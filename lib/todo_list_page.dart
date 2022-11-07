@@ -16,7 +16,7 @@ class _TodoListPageState extends State<TodoListPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Lista de Tarefas e Dismissible"),
+        title: const Text("C.R.U.Dismissible"),
       ),
       body: SingleChildScrollView(
           padding: const EdgeInsets.all(24),
