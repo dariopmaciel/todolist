@@ -25,9 +25,9 @@ class _TodoListPageState extends State<TodoListPage> {
               controller: _textEditingController,
             ),
             SizedBox(
-              height: 200,
+              height: 500,
               child: ListView.separated(
-                separatorBuilder: (context, index) => const Divider(),
+                separatorBuilder: (context, index) => Divider(),
                 itemCount: tarefas.length,
                 itemBuilder: (context, index) {
                   final item = tarefas[index];
