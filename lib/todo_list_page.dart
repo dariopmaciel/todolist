@@ -16,7 +16,7 @@ class _TodoListPageState extends State<TodoListPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("C.R.U.Dismissible"),
+        title: Text("C.R.U.Dismissible"),
       ),
       body: SingleChildScrollView(
           padding: const EdgeInsets.all(24),
@@ -25,7 +25,7 @@ class _TodoListPageState extends State<TodoListPage> {
               controller: _textEditingController,
             ),
             SizedBox(
-              height: 500,
+              height: 400,
               child: ListView.separated(
                 separatorBuilder: (context, index) => Divider(),
                 itemCount: tarefas.length,
