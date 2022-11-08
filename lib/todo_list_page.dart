@@ -1,81 +1,149 @@
-import 'package:flutter/material.dart';
+import 'dart:convert';
 
+import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+import 'models/item.dart';
+
+// ignore: must_be_immutable
 class TodoListPage extends StatefulWidget {
-  const TodoListPage({Key? key}) : super(key: key);
+  var items = <Item>[];
+
+  TodoListPage({Key? key}) : super(key: key);
+
+  // TodoListPage() {
+  //   items = [];
+  //   items.add(Item(title: "ITEM 1", done: true));
+  //   items.add(Item(title: "ITEM 2", done: false));
+  //   items.add(Item(title: "ITEM 3", done: true));
+  // }
 
   @override
   State<TodoListPage> createState() => _TodoListPageState();
 }
 
 class _TodoListPageState extends State<TodoListPage> {
-  final TextEditingController _textEditingController = TextEditingController();
+  var textEditingController = TextEditingController();
 
-  List<String> tarefas = []; //criação de lista
+  void add() {
+    if (textEditingController.text.isEmpty) return;
+    setState(() {
+      widget.items.add(Item(
+        title: textEditingController.text,
+        done: false,
+      ));
+      textEditingController.clear();
+      save(); //ou //textEditingController.text="";
+    });
+  }
+
+  void remove(int index) {
+    setState(() {
+      widget.items.removeAt(index);
+      save();
+    });
+  }
+
+  Future load() async {
+    // ignore: invalid_use_of_visible_for_testing_member
+    SharedPreferences.setMockInitialValues({});
+    var prefs = await SharedPreferences.getInstance();
+    var data = prefs.getString('data');
+    if (data != null) {
+      Iterable decoded = jsonDecode(data);
+      List<Item> result = decoded.map((e) => Item.fromJson(e)).toList();
+      setState(() {
+        widget.items = result;
+      });
+    }
+  }
+
+  save() async {
+    var prefs = await SharedPreferences.getInstance();
+    await prefs.setString("data", jsonEncode(widget.items));
+  }
+
+  _TodoListPageState() {
+    load();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("C.R.U.Dismissible"),
+        title: const Text("C.R.U.Dismissible"),
       ),
       body: SingleChildScrollView(
-          padding: const EdgeInsets.all(24),
-          child: Column(children: <Widget>[
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          children: <Widget>[
             TextField(
-              controller: _textEditingController,
+              keyboardType: TextInputType.text,
+              controller: textEditingController,
+              style: const TextStyle(
+                fontSize: 20,
+                color: Colors.black,
+              ),
+              decoration:
+                  const InputDecoration(labelText: "Adicione Item Agora:"),
             ),
             SizedBox(
               height: 400,
-              child: ListView.separated(
-                separatorBuilder: (context, index) => Divider(),
-                itemCount: tarefas.length,
-                itemBuilder: (context, index) {
-                  final item = tarefas[index];
-                  /*return ListTile(title: Text(tarefas[index]));*/
+              child: ListView.builder(
+                itemCount: widget.items.length,
+                itemBuilder: (context, int index) {
+                  final item = widget.items[index];
                   return Dismissible(
                     background: Container(
-                      padding: EdgeInsets.only(left: 10),
+                      padding: const EdgeInsets.only(left: 10),
                       alignment: Alignment.centerLeft,
-                      color: Colors.red.withOpacity(0.8),
+                      color: Colors.red.withOpacity(0.2),
                       child: const Icon(
                         Icons.delete,
                         color: Colors.white,
                       ),
                     ),
                     onDismissed: (direction) {
-                      setState(() {
-                        tarefas.removeAt(index);
-                        print("REMOVIDO");
-                      });
-                      Scaffold.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text("$item foi removido"),
-                        ),
+                      setState(
+                        () {
+                          if (direction == DismissDirection.startToEnd) {
+                            remove(index);
+                            save();
+                            // ignore: avoid_print
+                            print("Deletado para DIREITA");
+                          } else {
+                            remove(index);
+                            save();
+                            // ignore: avoid_print
+                            print("Deletado para ESQUERDA");
+                          }
+                        },
                       );
                     },
-                    key: ValueKey(tarefas[index]),
-                    child: ListTile(
-                      title: Text(
-                        tarefas[index],
-                      ),
+                    key: Key(item.title),
+                    child: CheckboxListTile(
+                      title: Text(item.title),
+                      value: item.done,
+                      onChanged: (value) {
+                        setState(
+                          () {
+                            item.done = value!;
+                            save();
+                          },
+                        );
+                      },
                     ),
                   );
                 },
               ),
             ),
-          ])),
+          ],
+        ),
+      ),
       floatingActionButton: FloatingActionButton(
         backgroundColor: Colors.green,
-        onPressed: () {
-          if (_textEditingController.text.isNotEmpty) {
-            setState(() {
-              tarefas.add(_textEditingController.text); // Add o item na lista
-            });
-            _textEditingController.clear();
-          }
-          //print(tarefas); //printa no console
-        },
-        child: Icon(Icons.add),
+        onPressed: add,
+        child: const Icon(Icons.add),
       ),
     );
   }
