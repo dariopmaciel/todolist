@@ -84,15 +84,16 @@ class _TodoListPageState extends State<TodoListPage> {
                 fontSize: 20,
                 color: Colors.black,
               ),
-              decoration:
-                  const InputDecoration(labelText: "Adicione Item Agora:"),
+              decoration: const InputDecoration(labelText: "Adicione Item:"),
             ),
             SizedBox(
-              height: 400,
+              height: 350,
               child: ListView.builder(
                 itemCount: widget.items.length,
                 itemBuilder: (context, int index) {
-                  final item = widget.items[index];
+                  int reversedIndex =
+                      widget.items.length - 1 - index; //inversor de lista
+                  final item = widget.items[reversedIndex];
                   return Dismissible(
                     background: Container(
                       padding: const EdgeInsets.only(left: 10),
@@ -107,12 +108,12 @@ class _TodoListPageState extends State<TodoListPage> {
                       setState(
                         () {
                           if (direction == DismissDirection.startToEnd) {
-                            remove(index);
+                            remove(reversedIndex);
                             save();
                             // ignore: avoid_print
                             print("Deletado para DIREITA");
                           } else {
-                            remove(index);
+                            remove(reversedIndex);
                             save();
                             // ignore: avoid_print
                             print("Deletado para ESQUERDA");
